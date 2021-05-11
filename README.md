@@ -42,7 +42,6 @@ Maoshuai – [GitHub](https://github.com/maoshuai) – imshuai67@gmail.com
 
 Distributed under the Apache License 2.0 . See ``LICENSE`` for more information.
 
-[https://github.com/yourname/github-link](https://github.com/dbader/)
 
 ## Contributing
 
