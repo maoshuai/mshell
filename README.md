@@ -1,5 +1,5 @@
 # MShell
-> MShell is to modularize you shell scripts.
+> MShell is to modularize your shell scripts.
 
 
 MShell stands for Modularized Shell. It helps you to write large yet well-maintainable shell scripts.
