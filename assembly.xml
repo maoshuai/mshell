@@ -1,0 +1,20 @@
+<assembly>
+	<id>assembly</id>
+	<formats>
+		<format>tar</format>
+	</formats>
+	
+	<!-- copy all shell resources -->
+	<fileSets>
+		<fileSet>
+			<directory>${project.build.directory}/shell/</directory>
+			<outputDirectory>.</outputDirectory>
+			<lineEnding>unix</lineEnding>
+			<fileMode>755</fileMode>
+		</fileSet>
+	</fileSets>
+
+
+
+
+</assembly>

@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+
+#----------------------
+# author:	maoshuai
+# date:		2021-02-09
+# desc:     This shell is a wrapper for bash script
+#           We mainly introduce importModule as kinda a syntax.
+#----------------------
+
+set -e
+
+main()
+{
+
+
+	while getopts "m:" arg
+	do
+		case $arg in 
+			v)  # show version info
+				_isShowVersion="true"
+				
+			;;
+			m)  # set MSHELL_PATH
+				_mshellPathOption="$OPTARG"
+				
+			;;
+			?)
+				handle_option_error
+				throw 
+			;;
+		esac
+
+	done
+
+    # decide mshellPath
+    setMshellPath "$_mshellPathOption"
+    # exporting this function
+    export -f importModule
+
+	shift $(( $OPTIND-1 ))
+
+	invokeMain "$@"
+
+}
+
+# invoke main method
+invokeMain(){
+	local mainMethod="$1"
+	if [ x"$mainMethod" == x"" ];then
+		echo "Main-method not given.">&2
+		exit 2
+	fi
+	shift 1
+	local mainModule=$(echo $mainMethod | awk -F '_' '{print $1}')
+	importModule "$mainModule"
+	"$mainMethod" "$@"
+}
+
+
+# get mshell module path
+setMshellPath(){
+    local mshellPathOption="$1"
+
+    # use mshellPathOption
+    if [ x"$mshellPathOption" != x"" ];then
+        MSHELL_PATH="$mshellPathOption"
+    elif [ x"$MSHELL_PATH" == x"" ];then
+       # by default using current directory
+        MSHELL_PATH="$(pwd)"
+    fi
+
+    # replace dot path as absolute path
+    # TODO 
+
+    # export VARIABLE
+    export MSHELL_PATH
+
+
+}
+
+
+#----------------------
+# add an wrapper syntax for bash source
+# The main difference to source syntax is: avoid repeated source
+#
+# All modules will be searched in $MSHELL_PATH with the suffix ".module"
+#----------------------
+importModule(){
+
+	# need at least 1 param as module name
+	if [ $# -lt 1 ];then
+		echo "Invalid importModule syntax: moduleName is empty" >&2
+		exit 1
+	fi
+	local moduleName="$1"
+	if [ x"$moduleName" == x"" ];then
+		echo "Invalid importModule syntax: moduleName is empty" >&2
+		exit 1
+	fi
+
+	# generate a uniq identifier for current module, we hash the module name because the module name
+	# may be a invalid variable name
+	local md5digest=$(echo "$moduleName" | md5sum | awk  '{print $1}')
+	local importIdentifier="__import__module__$md5digest"
+	local preImportIdentifier="__pre_import__module__$md5digest"
+	# return if pre-loaded before
+	if [ x"${!preImportIdentifier}" != x"" ];then
+		return
+	fi
+	eval "$preImportIdentifier=true"
+	
+	# return if loaded before
+	if [ x"${!importIdentifier}" != x"" ];then
+		return
+	fi
+
+	# check moudle file
+	# scan all MSHELL_PATH
+	mshellPathArr=(${MSHELL_PATH//:/ })
+
+	for tempPath in ${mshellPathArr[@]};do
+		local moduleFile="$tempPath/${moduleName}.module"
+		if [ -f $moduleFile ];then
+			# source module file and pass the remaining arguments.
+			shift
+			. $moduleFile "$@"
+
+			# if there is a init method, call it
+			local initMethod="${moduleName}_init"
+			if [ "$(type -t ${initMethod})" == "function" ];then
+				$initMethod "$@"
+			fi
+
+			# mark as imported
+			eval "$importIdentifier=true"
+			break
+		fi
+	done
+
+	# module not found in any path
+	if [ x"${!importIdentifier}" != x"true" ];then
+		echo "Failed to import module, no such module: '$moduleName', MSHELL_PATH=$MSHELL_PATH" >&2
+		exit 1
+	fi
+
+}
+
+
+main "$@"

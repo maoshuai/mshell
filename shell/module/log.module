@@ -1,0 +1,3 @@
+# wrapper for simpleLog4sh
+# Other modules or shells simply importModule "log"
+.  $MSHELL_HOME/lib/simpleLog4sh/src/simpleLog4sh.source  $MSHELL_HOME/lib/simpleLog4sh/src/simpleLog4sh.cfg

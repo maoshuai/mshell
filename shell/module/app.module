@@ -1,0 +1,35 @@
+#----------------------
+# author:	maoshuai
+# date:		2021-02-18
+# desc:     The main method of app with basic module support: log and profile
+#----------------------
+
+importModule 'profile' "true"
+# Note: log module should be imported after profile
+importModule 'log'
+importModule 'job'
+importModule 'git'
+
+app_main(){
+
+    # refresh log name by job name immediately
+    job_refreshLogName "$@"
+
+    # set log mdc
+    logSetMDC "MSHELL_JOB_ID" "$(job_generateJobId)"
+    logSetMDC "MSHELL_JOB_NAME" "$1"
+
+    # print banner and version related info
+    logEcho "$MSHELL_APP_BANNER"
+    local gitCommit="$(git_getCommitAbbrev)"
+    local gitBuildTime="$(git_getBuildTime)"
+    local installTime="$(git_getInstallTime)"
+    logEcho "(commit: $gitCommit, build: $gitBuildTime, install: $installTime)"
+    logEcho ""
+
+
+    # start job
+    job_startJob "$@"
+
+    # Note: DON'T add any lines afterwards, or the return code will be tampered!
+}

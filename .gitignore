@@ -1,0 +1,11 @@
+.project
+.classpath
+.settings/
+target/
+*.iml
+.idea/
+logs/
+sftp-config.json
+.copyarea.db
+.vscode/
+shell/test_data

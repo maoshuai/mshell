@@ -1,0 +1,47 @@
+#----------------------
+# author:	maoshuai
+# date:		2020-05-08
+# desc: use flock to avoid running multiple job instances simultaneously
+#----------------------
+importModule "log"
+importModule "util"
+
+# acquire lock by lockerName
+# job with the same locker name cannot run simultaneously
+lock_acquireLock(){
+	local lockerName="$1"
+	util_assertArgumentNotEmpty "$lockerName" "lockerName"
+
+	mkdir -p $MSHELL_LOCK_DIR
+	# in case lockerName is not a valid file name
+	lockFile=$(lock_getLockFile $lockerName)
+	logInfo "lockFile: $lockFile"
+	exec 123<>$lockFile
+
+	local exitCode=0
+	flock -n 123 || exitCode=$?
+
+	if [ $exitCode -ne 0 ];then
+		logEchoError "Lock file: $lockFile"
+		logEchoError "Job instances with the same name can't run simultaneously. You may wait for or kill this currently running job and re-run:"
+		local runningPID=$(cat $lockFile)
+		ps -f -p $runningPID || true
+
+		logEcho ""
+		logEcho "*******Tips********"
+		logEcho "Kill this running job by executing: $MSHELL_HOME/sbin/job.sh stop $lockerName"
+		
+		exit 3
+	fi
+
+	echo "$$" >&123
+
+}
+
+
+lock_getLockFile(){
+	local lockerName="$1"
+	util_assertArgumentNotEmpty "$lockerName" "lockerName"
+	lockFile=$MSHELL_LOCK_DIR/$(echo "$lockerName" | md5sum | awk  '{print $1}')
+	echo $lockFile
+}

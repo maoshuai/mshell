@@ -1,0 +1,32 @@
+#----------------------
+# author:	maoshuai
+# date:		2020-04-26
+# desc: read git properties
+#----------------------
+
+importModule "log"
+
+git_getCommitAbbrev(){
+	_git_getValueByKey "git.commit.id.abbrev"
+}
+
+git_getBuildTime(){
+	_git_getValueByKey "git.build.time" | sed 's/\\//g'
+}
+
+git_getInstallTime(){
+	_git_getValueByKey "install_time"
+}
+
+_git_getValueByKey(){
+	local key="$1"
+	local gitProperty=$MSHELL_HOME/meta/git.properties
+
+	if [ ! -f $gitProperty ];then
+		echo ""
+		logWarn "No git.properties found: $gitProperty, failed to fetch $key"
+		return
+	fi
+
+	cat $gitProperty | sed -n '/^[[:space:]]*'"$key"'[[:space:]]*=[[:space:]]*/s/^[[:space:]]*'"$key"'[[:space:]]*=[[:space:]]*//p'
+}

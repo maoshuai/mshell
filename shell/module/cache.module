@@ -1,0 +1,39 @@
+#----------------------
+# author:	maoshuai
+# date:		2021-02-18
+# desc:     provide a simple cache
+#----------------------
+
+importModule 'log'
+
+# set cache
+cache_set(){
+    local varName="$1"
+    local varValue="$2"
+
+    local cacheKey="$(_cache_getCacheKey $varName)"
+
+    logDebug "set cache: $varName=$varValue"
+    eval "$cacheKey=$varValue"
+    export $cacheKey
+}
+
+# get cache
+cache_get(){
+    local varName="$1"
+
+
+    local cacheKey="$(_cache_getCacheKey $varName)"
+    local varValue=${!cacheKey}
+
+
+    logDebug "get cache: $varName=$varValue"
+    echo "$varValue"
+}
+
+_cache_getCacheKey(){
+    local varName="$1"
+    local cacheKey="__MSHELL_cache__$varName"
+    logTrace "cacheKey=$cacheKey"
+    echo "$cacheKey"
+}

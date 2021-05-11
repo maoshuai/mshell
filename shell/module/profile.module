@@ -1,0 +1,100 @@
+#----------------------
+# author:	maoshuai
+# date:		2021-02-17
+# desc:     profile loading module
+#----------------------
+
+
+profile_loadProfile(){
+
+	local userProfileRc="$1"
+	if [ x"$userProfileRc" == x"" ];then
+		userProfileRc="$(_profile_getDefaultUserProfileRc)"
+	fi
+    local userProfileVarName="$2"
+	if [ x"$userProfileVarName" == x"" ];then
+		userProfileVarName="$(_profile_getDefaultUserProfileVarName)"
+	fi
+
+	local userConfFileName="$3"
+	if [ x"$uerConfFileName" == x"" ];then
+		userConfFileName="$(_profile_getDefaultUserConfFileName)"
+	fi
+
+	local userConfFileDir="$4"
+	if [ x"$userConfFileDir" == x"" ];then
+		userConfFileDir="$(_profile_getDefaultUserConfFileDir)"
+	fi
+
+	# decide which profile to active
+	if [ ! -f ~/"${userProfileRc}" ];then
+		echo "(ERROR) No profile rc found: ~/$userProfileRc" >&2
+		exit 1
+	fi
+	. ~/${userProfileRc}
+
+	# check the profile is valid
+	if [ x"${!userProfileVarName}" == x"" ];then
+		echo "(ERROR) Profile rc is invalid, no such variable name: $userProfileVarName" >&2
+		exit 1
+	fi
+	export ${userProfileVarName}=${!userProfileVarName}
+
+	_profile_loadConfig "$userConfFileDir" "${!userProfileVarName}" "$userConfFileName"
+
+}
+
+
+
+_profile_loadConfig(){
+	local userConfFileDir="$1"
+	local userProfileVarValue="$2"
+	local userConfFileName="$3"
+	# check if the profile really exists
+	if [ ! -f "$userConfFileDir/default/$userConfFileName" ];then
+		echo "(ERROR) No such default profile conf, please check: $userConfFileDir/default/$userConfFileName" >&2
+		exit 1
+	fi
+
+	# check if the profile really exists
+	if [ ! -f "$userConfFileDir/${!userProfileVarName}/$userConfFileName" ];then
+		echo "(ERROR) No such profile conf, please check: $userConfFileDir/${!userProfileVarName}/$userConfFileName" >&2
+		exit 1
+	fi
+	# There are dependency problems for some variables
+	. $userConfFileDir/default/$userConfFileName
+	. $userConfFileDir/$userProfileVarValue/$userConfFileName
+
+
+	importModule 'log'
+	logTrace "profile loaded from: $userConfFileDir/default/$userConfFileName"
+	logTrace "profile loaded from: $userConfFileDir/$userProfileVarValue/$userConfFileName"
+}
+
+_profile_mergeProfile(){
+	echo "Not implemented">&2
+	exit 1
+}
+
+_profile_getDefaultUserProfileRc(){
+	echo ".mshellrc"
+}
+
+_profile_getDefaultUserProfileVarName(){
+	echo "MSHELL_PROFILE"
+}
+
+_profile_getDefaultUserConfFileName(){
+	echo "mshell.conf"
+}
+
+_profile_getDefaultUserConfFileDir(){
+	echo "$MSHELL_HOME/profiles"
+}
+
+profile_init(){
+	local autoLoadProfile="$1"
+	if [ x"$autoLoadProfile" == x"true" ];then
+		profile_loadProfile
+	fi
+}

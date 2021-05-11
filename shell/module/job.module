@@ -1,0 +1,112 @@
+#----------------------
+# author:	maoshuai
+# date:		2020-04-26
+# desc:     dispatch a job to a handler
+#----------------------
+
+importModule 'log'
+importModule 'lock'
+
+job_startJob(){
+    # check parameters and get jobName
+	if [ $# -lt 1 ];then
+		throw "No job name."
+	fi
+    local jobName="$1"
+    shift 1
+
+    # print job basic info
+    local jobBeginTime=$(date +%s)
+	local jobBeginTimeHumanReadable="$(date -d @${jobBeginTime} "+%Y-%m-%d %H:%M:%S")"
+    logEcho "[JOB_INFO]
+- Job Name      : $jobName
+- Job Args      : $@
+- Staring Time  : $jobBeginTimeHumanReadable
+- PID           : $$
+- Shell Logging : $(_getCurrentLogFile)
+"
+
+    # dipatch the job to the handler
+    logEcho "[JOB_BEGIN]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+    # here is a trick to fix set -e problem
+    set +e
+	_job_dispatch "$jobName" "$@" 
+    local exitCode=$?
+    set -e
+    logEcho "[JOB_END  ]<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+
+
+
+    # job is finished, print the summary info.
+    local jobEndTime=$(date +%s)
+	local jobEndTimeHumanReadable="$(date -d @${jobEndTime} "+%Y-%m-%d %H:%M:%S")"
+	local jobCostTime=$(($jobEndTime - $jobBeginTime))
+
+    # print exit code 
+    local exitFlag="FAILED"
+	if [ $exitCode -eq 0 ];then
+		exitFlag="SUCCESSFUL"
+	fi
+
+	logEcho "
+[EXIT_STATUS]
+- End Time  : $jobEndTimeHumanReadable
+- Cost Sec  : $jobCostTime
+- Exit Code : $exitCode ($exitFlag)"
+    
+    return $exitCode
+   
+}
+
+# why use & and wait?
+# note: set -e is ignored in sub-shell
+_job_dispatch(){
+    _job_doDispatch "$@" &
+    wait $!
+}
+
+_job_doDispatch(){
+    set -e
+    local handler="$1"
+    shift 1
+    
+    # get lock for this job
+    lock_acquireLock "$handler"
+
+    # get handler shell
+    local handlerPath="$MSHELL_HOME/handler/$handler"
+
+    logInfo "Dispatch to handler: $handlerPath"
+
+    if [ ! -f $handlerPath ];then
+        logEchoError "No such handler: $handlerPath"
+        return 1
+    fi
+
+    # source the handler then call handler_main if possible.
+    . $handlerPath
+
+    if [ x"$(type -t "handler_main")" == x"function" ];then
+        handler_main "$@"
+    else
+        logWarn "Running ordinary shell, it is highly recommended to convert it to a handler!"
+    fi
+  
+
+}
+
+job_refreshLogName(){
+    local jobName="$1"
+    jobName=$(echo "$jobName" | sed 's@/@__@g')
+    # each job has its own log file
+    if [ x"$jobName" != x"" ];then
+        refreshLogger "$jobName"
+    else
+        refreshLogger "no_name_job"
+    fi
+}
+
+# generate a uniq job id
+job_generateJobId(){
+	date +%Y%m%d%H%M%S%N
+}

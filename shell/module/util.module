@@ -1,0 +1,26 @@
+importModule 'log'
+
+util_assertArgumentNotEmpty(){
+	local value="$1"
+	local argumentName="$2"
+
+	if [ x"$value" == x"" ];then
+		throw "$argumentName is empty"
+	fi
+}
+
+
+
+util_printUsage(){
+	local scriptName="launcher.sh"
+	logEcho "
+Usage:
+    $scriptName <jobName> [<jobArguments>]
+    where
+      <jobName> is the name of a job.
+      <jobArguments> are optional arguments for this job.
+Examples:
+    $scriptName MY_JOB
+    $scriptName MY_JOB shanghai
+"
+}
