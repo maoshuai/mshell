@@ -8,25 +8,9 @@ importModule 'profile' "true"
 # Note: log module should be imported after profile
 importModule 'log'
 importModule 'job'
-importModule 'git'
+
 
 app_main(){
-
-    # refresh log name by job name immediately
-    job_refreshLogName "$@"
-
-    # set log mdc
-    logSetMDC "MSHELL_JOB_ID" "$(job_generateJobId)"
-    logSetMDC "MSHELL_JOB_NAME" "$1"
-
-    # print banner and version related info
-    logEcho "$MSHELL_APP_BANNER"
-    local gitCommit="$(git_getCommitAbbrev)"
-    local gitBuildTime="$(git_getBuildTime)"
-    local installTime="$(git_getInstallTime)"
-    logEcho "(commit: $gitCommit, build: $gitBuildTime, install: $installTime)"
-    logEcho ""
-
 
     # start job
     job_startJob "$@"

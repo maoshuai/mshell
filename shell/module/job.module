@@ -6,8 +6,25 @@
 
 importModule 'log'
 importModule 'lock'
+importModule 'git'
 
 job_startJob(){
+
+     # refresh log name by job name immediately
+    job_refreshLogName "$@"
+    
+    # set log mdc
+    logSetMDC "MSHELL_JOB_ID" "$(job_generateJobId)"
+    logSetMDC "MSHELL_JOB_NAME" "$1"
+
+    # print banner and version related info
+    _job_printExtraInfo "$MSHELL_APP_BANNER"
+    local gitCommit="$(git_getCommitAbbrev)"
+    local gitBuildTime="$(git_getBuildTime)"
+    local installTime="$(git_getInstallTime)"
+    _job_printExtraInfo "(commit: $gitCommit, build: $gitBuildTime, install: $installTime)"
+    _job_printExtraInfo ""
+
     # check parameters and get jobName
 	if [ $# -lt 1 ];then
 		throw "No job name."
@@ -18,7 +35,7 @@ job_startJob(){
     # print job basic info
     local jobBeginTime=$(date +%s)
 	local jobBeginTimeHumanReadable="$(date -d @${jobBeginTime} "+%Y-%m-%d %H:%M:%S")"
-    logEcho "[JOB_INFO]
+    _job_printExtraInfo "[JOB_INFO]
 - Job Name      : $jobName
 - Job Args      : $@
 - Staring Time  : $jobBeginTimeHumanReadable
@@ -27,13 +44,13 @@ job_startJob(){
 "
 
     # dipatch the job to the handler
-    logEcho "[JOB_BEGIN]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+    _job_printExtraInfo "[JOB_BEGIN]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
     # here is a trick to fix set -e problem
     set +e
 	_job_dispatch "$jobName" "$@" 
     local exitCode=$?
     set -e
-    logEcho "[JOB_END  ]<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+    _job_printExtraInfo "[JOB_END  ]<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 
 
 
@@ -48,7 +65,7 @@ job_startJob(){
 		exitFlag="SUCCESSFUL"
 	fi
 
-	logEcho "
+	_job_printExtraInfo "
 [EXIT_STATUS]
 - End Time  : $jobEndTimeHumanReadable
 - Cost Sec  : $jobCostTime
@@ -109,4 +126,13 @@ job_refreshLogName(){
 # generate a uniq job id
 job_generateJobId(){
 	date +%Y%m%d%H%M%S%N
+}
+
+
+_job_printExtraInfo(){
+    if [ x"$MSHELL_JOB_PRINT_VERBOSE" == x"true" ];then
+        logEcho "$@"
+    else
+        logInfo "$@"
+    fi
 }
