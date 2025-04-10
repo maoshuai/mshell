@@ -75,7 +75,18 @@
 					<descriptors>
 						<descriptor>assembly.xml</descriptor>
 					</descriptors>
-				</configuration>
+				</configuration>	
+				<distributionManagement>
+		 <snapshotRepository>
+		    <id>nexusRepo</id>
+		    <url>http://172.17.0.1:8081/repository/sample-snapshots/</url>
+		 </snapshotRepository>
+		
+		<repository>
+		    <id>nexusRepo</id>
+		    <url>http://172.17.0.1:8081/repository/flm-releases/</url>
+		</repository>
+  	</distributionManagement>
 				<executions>
 					<execution>
 						<id>make-assembly</id>
