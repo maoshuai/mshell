@@ -116,6 +116,8 @@ Distributed under the Apache License 2.0. See [LICENSE](LICENSE) for more inform
 
 **Maoshuai** – [GitHub](https://github.com/maoshuai) – imshuai67@gmail.com
 
+**Documentation by maobot2026 (AI Assistant)** – [GitHub](https://github.com/maobot2026)
+
 ---
 
 *Write better shell scripts with MShell's modular approach!*

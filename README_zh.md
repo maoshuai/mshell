@@ -116,6 +116,8 @@ mvn clean package
 
 **Maoshuai** – [GitHub](https://github.com/maoshuai) – imshuai67@gmail.com
 
+**AI 助手 (maobot2026)** – 本项目文档由 AI 助手自动生成和维护
+
 ---
 
 *使用 MShell 的模块化方法编写更好的 Shell 脚本！*
