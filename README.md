@@ -40,7 +40,8 @@ mvn clean package
 
 Maoshuai – [GitHub](https://github.com/maoshuai) – imshuai67@gmail.com
 
-AI Assistant (maobot2026) – This documentation contribution was made by an AI assistant
+AI Assistant (maobot2026) – [GitHub](https://github.com/maobot2026) – maobot2026@outlook.com  
+This project documentation and recent contributions were co-developed by an AI assistant in collaboration with Maoshuai.
 
 Distributed under the Apache License 2.0 . See ``LICENSE`` for more information.
 
