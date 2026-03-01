@@ -7,13 +7,15 @@ importModule 'util'
 handler_main(){
     logInfo "Testing util_isFileEmpty function"
     
-    # Create test files
-    local empty_file="/tmp/test_empty.txt"
-    local non_empty_file="/tmp/test_non_empty.txt"
-    local non_existent_file="/tmp/non_existent.txt"
+    # Create temporary test files using mktemp to avoid conflicts
+    local empty_file=$(mktemp)
+    local non_empty_file=$(mktemp)
+    local non_existent_file="/tmp/non_existent_$(date +%s)_$$"
     
-    # Create empty file
-    touch "$empty_file"
+    # Ensure cleanup even if script fails
+    trap 'rm -f "$empty_file" "$non_empty_file"' EXIT
+    
+    # Create empty file (mktemp already creates empty file)
     
     # Create non-empty file  
     echo "test content" > "$non_empty_file"
@@ -38,9 +40,6 @@ handler_main(){
     else
         logEcho "✗ Non-existent file should return exit code 2"
     fi
-    
-    # Clean up
-    rm -f "$empty_file" "$non_empty_file"
     
     logInfo "util_isFileEmpty test completed successfully"
 }
