@@ -2,7 +2,7 @@
 
 > **MShell** 代表 **模块化 Shell (Modularized Shell)**。它帮助您编写大型但易于维护的 Shell 脚本。
 
-![MShell 架构](https://raw.githubusercontent.com/maoshuai/mshell/main/doc/img/header.png)
+![MShell 架构](doc/img/header.png)
 
 MShell 是一个框架，旨在为 Shell 脚本带来模块化、结构化和企业级特性。它将传统的线性 Shell 脚本转变为具有适当错误处理、日志记录和模块系统的组织化、可维护的应用程序。
 
