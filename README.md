@@ -2,7 +2,7 @@
 
 > **MShell** stands for **Modularized Shell**. It helps you write large yet well-maintainable shell scripts.
 
-![MShell Architecture](doc/img/header.png)
+![MShell Architecture](https://raw.githubusercontent.com/maoshuai/mshell/main/doc/img/header.png)
 
 MShell is a framework designed to bring modularity, structure, and enterprise-grade features to shell scripting. It transforms traditional linear shell scripts into organized, maintainable applications with proper error handling, logging, and module systems.
 
