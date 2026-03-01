@@ -24,3 +24,24 @@ Examples:
     $scriptName MY_JOB shanghai
 "
 }
+
+
+# Check if a file exists and is empty
+# Usage: util_isFileEmpty <file_path>
+# Returns: 
+#   0 - file exists and is empty
+#   1 - file exists and is not empty  
+#   2 - file does not exist
+util_isFileEmpty(){
+    local file_path="$1"
+    
+    if [ ! -f "$file_path" ]; then
+        return 2
+    fi
+    
+    if [ ! -s "$file_path" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
