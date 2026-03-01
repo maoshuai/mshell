@@ -7,16 +7,12 @@ importModule 'util'
 handler_main(){
     logInfo "Testing util_isFileEmpty function"
     
-    # Use the job's log directory for test files to avoid conflicts
-    local test_dir="${MSHELL_HOME}/shell/test_data/${MSHELL_PROFILE:-dev}/shell-log-${USER:-$(whoami)}/$(date +%Y%m%d)"
-    mkdir -p "$test_dir"
+    # Create temporary test files using mktemp (standard practice)
+    local empty_file=$(mktemp)
+    local non_empty_file=$(mktemp)
+    local non_existent_file="/tmp/non_existent_$(date +%s)_$$"
     
-    local empty_file="$test_dir/test_empty_$$"
-    local non_empty_file="$test_dir/test_non_empty_$$"
-    local non_existent_file="$test_dir/non_existent_$$"
-    
-    # Create empty file
-    touch "$empty_file"
+    # Create empty file (mktemp already creates empty file)
     
     # Create non-empty file  
     echo "test content" > "$non_empty_file"
@@ -42,7 +38,7 @@ handler_main(){
         logEcho "✗ Non-existent file should return exit code 2"
     fi
     
-    # Clean up test files
+    # Clean up temporary files
     rm -f "$empty_file" "$non_empty_file"
     
     logInfo "util_isFileEmpty test completed successfully"
