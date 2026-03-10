@@ -8,6 +8,20 @@ importModule 'log'
 importModule 'lock'
 importModule 'git'
 
+# Cross-platform date formatting function
+# Converts Unix timestamp to human-readable format
+# Works on both Linux (date -d) and macOS (date -r)
+_job_formatTimestamp(){
+    local timestamp="$1"
+    if date -d @"${timestamp}" "+%Y-%m-%d %H:%M:%S" 2>/dev/null; then
+        # Linux
+        date -d @"${timestamp}" "+%Y-%m-%d %H:%M:%S"
+    else
+        # macOS
+        date -r "${timestamp}" "+%Y-%m-%d %H:%M:%S"
+    fi
+}
+
 job_startJob(){
 
      # refresh log name by job name immediately
@@ -34,7 +48,7 @@ job_startJob(){
 
     # print job basic info
     local jobBeginTime=$(date +%s)
-	local jobBeginTimeHumanReadable="$(date -d @${jobBeginTime} "+%Y-%m-%d %H:%M:%S")"
+	local jobBeginTimeHumanReadable="$(_job_formatTimestamp ${jobBeginTime})"
     _job_printExtraInfo "[JOB_INFO]
 - Job Name      : $jobName
 - Job Args      : $@
@@ -56,7 +70,7 @@ job_startJob(){
 
     # job is finished, print the summary info.
     local jobEndTime=$(date +%s)
-	local jobEndTimeHumanReadable="$(date -d @${jobEndTime} "+%Y-%m-%d %H:%M:%S")"
+	local jobEndTimeHumanReadable="$(_job_formatTimestamp ${jobEndTime})"
 	local jobCostTime=$(($jobEndTime - $jobBeginTime))
 
     # print exit code 
